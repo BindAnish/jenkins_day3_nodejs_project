@@ -1,38 +1,26 @@
+const request = require('supertest');
+const { expect } = require('chai');
+const app = require('../index');
 
-const test = require("node:test");
-const assert = require("node:assert/strict");
-const app = require("./index");
+describe('Node.js Application Tests', function () {
 
-test("Home page returns success", async () => {
-    const server = app.listen(0);
+    it('should return the home page successfully', async function () {
+        const res = await request(app).get('/');
 
-    try {
-        const port = server.address().port;
-        const response = await fetch(`http://127.0.0.1:${port}/`);
-        const body = await response.text();
+        expect(res.status).to.equal(200);
+        expect(res.text).to.equal(
+            'Hello from Node.js CI/CD Project!'
+        );
+    });
 
-        assert.equal(response.status, 200);
-        assert.match(body, /Node.js Docker Jenkins CI\/CD Project is Running/);
-    } finally {
-        await new Promise((resolve, reject) => {
-            server.close(error => error ? reject(error) : resolve());
-        });
-    }
-});
+    it('should return application health status', async function () {
+        const res = await request(app).get('/health');
 
-test("Health endpoint returns UP", async () => {
-    const server = app.listen(0);
+        expect(res.status).to.equal(200);
+        expect(res.body.status).to.equal('OK');
+        expect(res.body.message).to.equal(
+            'Application is running'
+        );
+    });
 
-    try {
-        const port = server.address().port;
-        const response = await fetch(`http://127.0.0.1:${port}/health`);
-        const body = await response.json();
-
-        assert.equal(response.status, 200);
-        assert.equal(body.status, "UP");
-    } finally {
-        await new Promise((resolve, reject) => {
-            server.close(error => error ? reject(error) : resolve());
-        });
-    }
 });
